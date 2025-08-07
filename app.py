@@ -25,19 +25,30 @@ def _(mo):
 @app.cell
 def _():
     import matplotlib.pyplot as plt
-    import seaborn as sns
     import pandas as pd
+    import seaborn as sns
 
-    from src.utils import get_dataset, get_features_target, get_train_test_sets
+    from src.plots import (
+        plot_target_distribution,
+        plot_credit_amounts,
+        plot_education_levels,
+        plot_occupation,
+        plot_family_status,
+        plot_income_type,
+    )
     from src.theme import custom_palette
+    from src.utils import get_dataset, get_features_target, get_train_test_sets
     return (
-        custom_palette,
         get_dataset,
         get_features_target,
         get_train_test_sets,
         pd,
-        plt,
-        sns,
+        plot_credit_amounts,
+        plot_education_levels,
+        plot_family_status,
+        plot_income_type,
+        plot_occupation,
+        plot_target_distribution,
     )
 
 
@@ -69,9 +80,11 @@ def _(mo):
 
 @app.cell
 def _(X_test, X_train, df):
-    print("Train dataset samples: {}".format(X_train.shape[0]))
-    print("Test dataset samples: {}".format(X_test.shape[0]))
-    print("Number of columns: {}".format(df.shape[1]))
+    train_samples = "Train dataset samples: {}".format(X_train.shape[0])
+    test_samples = "Test dataset samples: {}".format(X_test.shape[0])
+    columns_number = "Number of columns: {}".format(df.shape[1])
+
+    train_samples, test_samples, columns_number
     return
 
 
@@ -108,40 +121,21 @@ def _(mo):
 
 
 @app.cell
-def _(custom_palette, df, plt, sns):
-    # Get value counts and percentages
-    target_counts = df["TARGET"].value_counts()
-    target_percent = (target_counts / target_counts.sum() * 100).round(2)
+def _(df, plot_target_distribution):
+    target_table, target_plot = plot_target_distribution(df=df)
+    target_table
+    return (target_plot,)
 
-    # Combine into a DataFrame for clarity
-    target_df = target_counts.to_frame(name="Count")
-    target_df["Percentage"] = target_percent
 
-    # Plot
-    plt.figure(figsize=(8, 5))
-    ax = sns.barplot(
-        data=target_df,
-        x="TARGET",
-        y="Count",
-        hue="TARGET",
-        palette=custom_palette[:2],
-    )
-
-    # Titles and formatting
-    plt.title("Distribution of TARGET variable")
-    plt.xlabel("Payment Difficulties (1 = Yes, 0 = No)", fontsize=12)
-    plt.ylabel("Count", fontsize=12)
-    plt.grid(axis="y", linestyle="--", alpha=0.4)
-    plt.tight_layout()
-    plt.show()
-
-    target_df
+@app.cell
+def _(target_plot):
+    target_plot
     return
 
 
 @app.cell
 def _(mo):
-    mo.md("**e. Number of columns of each data type**")
+    mo.md("""**e. Number of columns of each data type**""")
     return
 
 
@@ -162,7 +156,7 @@ def _(X):
 
 @app.cell
 def _(mo):
-    mo.md("**f. Missing data**")
+    mo.md("""**f. Missing data**""")
     return
 
 
@@ -180,18 +174,88 @@ def _(X, pd):
 
 @app.cell
 def _(mo):
-    mo.md("### Distribution of Variables")
+    mo.md("""### Distribution of Variables""")
     return
 
 
 @app.cell
 def _(mo):
-    mo.callout(kind="info", value="Continues at point 1.9")
+    mo.md("""**a. Credit Amounts**""")
     return
 
 
 @app.cell
-def _():
+def _(X, plot_credit_amounts):
+    plot_credit_amounts(df=X)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""**b. Education Level of Credit Applicants**""")
+    return
+
+
+@app.cell
+def _(X, plot_education_levels):
+    education_table, education_plot = plot_education_levels(df=X)
+    education_table
+    return (education_plot,)
+
+
+@app.cell
+def _(education_plot):
+    education_plot
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""**c. Ocupation of Credit Applicants**""")
+    return
+
+
+@app.cell
+def _(X, plot_occupation):
+    occupation_table, occupation_plot = plot_occupation(df=X)
+    occupation_table
+    return (occupation_plot,)
+
+
+@app.cell
+def _(occupation_plot):
+    occupation_plot
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""**d. Family Status of Applicants**""")
+    return
+
+
+@app.cell
+def _(X, plot_family_status):
+    family_status_table, family_status_plot = plot_family_status(df=X)
+    family_status_table
+    return (family_status_plot,)
+
+
+@app.cell
+def _(family_status_plot):
+    family_status_plot
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""**e. Income Type of Applicants by Target Variable**""")
+    return
+
+
+@app.cell
+def _(df, plot_income_type):
+    plot_income_type(df=df)
     return
 
 
