@@ -17,12 +17,6 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
-    mo.md("""## Importing Libraries""")
-    return
-
-
-@app.cell
 def _():
     import matplotlib.pyplot as plt
     import pandas as pd
@@ -38,6 +32,7 @@ def _():
     )
     from src.theme import custom_palette
     from src.utils import get_dataset, get_features_target, get_train_test_sets
+    from src.preprocessing import preprocess_data
     return (
         get_dataset,
         get_features_target,
@@ -49,26 +44,26 @@ def _():
         plot_income_type,
         plot_occupation,
         plot_target_distribution,
+        preprocess_data,
     )
 
 
 @app.cell
-def _(get_dataset, get_features_target, get_train_test_sets):
+def _(get_dataset, get_features_target):
     df = get_dataset()
     X, y = get_features_target(df)
-    X_train, y_train, X_test, y_test = get_train_test_sets(X, y)
-    return X, X_test, X_train, df
+    return X, df, y
 
 
 @app.cell
 def _(mo):
-    mo.md("""## Exploratory Data Analysis""")
+    mo.md("""## 1. Exploratory Data Analysis""")
     return
 
 
 @app.cell
 def _(mo):
-    mo.md("""### Dataset Information""")
+    mo.md("""### 1.1 Dataset Information""")
     return
 
 
@@ -174,7 +169,7 @@ def _(X, pd):
 
 @app.cell
 def _(mo):
-    mo.md("""### Distribution of Variables""")
+    mo.md("""### 1.2 Distribution of Variables""")
     return
 
 
@@ -256,6 +251,61 @@ def _(mo):
 @app.cell
 def _(df, plot_income_type):
     plot_income_type(df=df)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""## 2. Preprocessing""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""**a. Separate Train and Test Datasets**""")
+    return
+
+
+@app.cell
+def _(X, get_train_test_sets, y):
+    X_train, y_train, X_test, y_test = get_train_test_sets(X, y)
+    X_train.shape, y_train.shape, X_test.shape, y_test.shape
+    return X_test, X_train
+
+
+@app.cell
+def _(mo):
+    mo.md("""**b. Preprocess Data**""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    This preprocessing perform:
+
+    - Correct outliers/anomalous values in numerical columns (`DAYS_EMPLOYED` column).
+    - Encode string categorical features (`dtype object`).
+        - If the feature has 2 categories, Binary Encoding is applied.
+        - One Hot Encoding for more than 2 categories.
+    - Impute values for all columns with missing data (using median as imputing value).
+    - Feature scaling with Min-Max scaler
+    """
+    )
+    return
+
+
+@app.cell
+def _(X_test, X_train, preprocess_data):
+    train_data, test_data = preprocess_data(train_df=X_train, test_df=X_test)
+    train_data.shape, test_data.shape
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("## 3. Training Models")
     return
 
 
