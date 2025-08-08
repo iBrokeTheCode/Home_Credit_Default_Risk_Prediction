@@ -24,6 +24,8 @@ def _():
 
     from sklearn.linear_model import LogisticRegression
     from sklearn.metrics import roc_auc_score
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.model_selection import RandomizedSearchCV
 
     from src.plots import (
         plot_target_distribution,
@@ -38,6 +40,7 @@ def _():
     from src.preprocessing import preprocess_data_pipeline
     return (
         LogisticRegression,
+        RandomForestClassifier,
         get_dataset,
         get_features_target,
         get_train_test_sets,
@@ -318,6 +321,14 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    mo.md(
+        r"""At this points, we will work with `train_data` and `test_data` as features sets; also `y_train` and `y_test` as target sets."""
+    )
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""### 3.1 Logistic Regression""")
     return
 
@@ -350,17 +361,129 @@ def _(
     log_reg.fit(train_data, y_train)
 
     # Train data predicton (class 1)
-    log_reg_train = log_reg.predict_proba(train_data)[:, 1]
+    lr_train_pred = log_reg.predict_proba(train_data)[:, 1]
 
     # Test data prediction (class 1)
-    log_reg_test = log_reg.predict_proba(test_data)[:, 1]
+    lr_test_pred = log_reg.predict_proba(test_data)[:, 1]
 
     # Get the ROC AUC Score on train and test datasets
     log_reg_scores = {
-        "train_score": roc_auc_score(y_train, log_reg_train),
-        "test_score": roc_auc_score(y_test, log_reg_test),
+        "train_score": roc_auc_score(y_train, lr_train_pred),
+        "test_score": roc_auc_score(y_test, lr_test_pred),
     }
     log_reg_scores
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### 3.2 Random Forest Classifier""")
+    return
+
+
+@app.cell
+def _(
+    RandomForestClassifier,
+    roc_auc_score,
+    test_data,
+    train_data,
+    y_test,
+    y_train,
+):
+    # 📌 Random Forest Classifier
+    rf = RandomForestClassifier(random_state=42, n_jobs=-1)
+    rf.fit(train_data, y_train)
+
+    rf_train_pred = rf.predict_proba(train_data)[:, 1]
+    rf_test_pred = rf.predict_proba(test_data)[:, 1]
+
+    rf_scores = {
+        "train_score": roc_auc_score(y_train, rf_train_pred),
+        "test_score": roc_auc_score(y_test, rf_test_pred),
+    }
+    rf_scores
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### 3.3. Randomized Search with Cross Validations""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    We use this code snippet to use `RandomizedSearchCV`:
+
+    ```py
+    param_dist = {"n_estimators": [50, 100, 150], "max_depth": [10, 20, 30]}
+
+    rf_optimized = RandomForestClassifier(random_state=42, n_jobs=-1)
+    rscv = RandomizedSearchCV(
+        estimator=rf_optimized,
+        param_distributions=param_dist,
+        n_iter=5,
+        scoring="roc_auc",
+        cv=3,
+        random_state=42,
+        n_jobs=-1,
+    )
+
+    rscv.fit(train_data, y_train)
+
+    rfo_train_pred = rscv.predict_proba(train_data)[:, 1]
+    rfo_test_pred = rscv.predict_proba(test_data)[:, 1]
+
+    rfo_scores = {
+        "train_score": roc_auc_score(y_train, rfo_train_pred),
+        "test_score": roc_auc_score(y_test, rfo_test_pred),
+    }
+    rfo_scores
+    ```
+    """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""📈 The obtained scores are:""")
+    return
+
+
+@app.cell
+def _():
+    rfo_scores = {
+        "train_score": 0.820563139010308,
+        "test_score": 0.7304320776838898,
+    }
+    rfo_scores
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""🥇The best results are:""")
+    return
+
+
+@app.cell
+def _(RandomForestClassifier):
+    optimized_results = {
+        "best_params_": {"n_estimators": 100, "max_depth": 10},
+        "best_score_": 0.7296259755147781,
+        "best_estimator_": RandomForestClassifier(
+            max_depth=10, n_jobs=-1, random_state=42
+        ),
+    }
+    optimized_results
+    return
+
+
+@app.cell
+def _():
     return
 
 
