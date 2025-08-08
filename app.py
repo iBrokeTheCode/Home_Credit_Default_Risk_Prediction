@@ -22,6 +22,9 @@ def _():
     import pandas as pd
     import seaborn as sns
 
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.metrics import roc_auc_score
+
     from src.plots import (
         plot_target_distribution,
         plot_credit_amounts,
@@ -32,8 +35,9 @@ def _():
     )
     from src.theme import custom_palette
     from src.utils import get_dataset, get_features_target, get_train_test_sets
-    from src.preprocessing import preprocess_data
+    from src.preprocessing import preprocess_data_pipeline
     return (
+        LogisticRegression,
         get_dataset,
         get_features_target,
         get_train_test_sets,
@@ -44,7 +48,8 @@ def _():
         plot_income_type,
         plot_occupation,
         plot_target_distribution,
-        preprocess_data,
+        preprocess_data_pipeline,
+        roc_auc_score,
     )
 
 
@@ -270,7 +275,7 @@ def _(mo):
 def _(X, get_train_test_sets, y):
     X_train, y_train, X_test, y_test = get_train_test_sets(X, y)
     X_train.shape, y_train.shape, X_test.shape, y_test.shape
-    return X_test, X_train
+    return X_test, X_train, y_test, y_train
 
 
 @app.cell
@@ -297,15 +302,65 @@ def _(mo):
 
 
 @app.cell
-def _(X_test, X_train, preprocess_data):
-    train_data, test_data = preprocess_data(train_df=X_train, test_df=X_test)
+def _(X_test, X_train, preprocess_data_pipeline):
+    train_data, test_data = preprocess_data_pipeline(
+        train_df=X_train, test_df=X_test
+    )
     train_data.shape, test_data.shape
+    return test_data, train_data
+
+
+@app.cell
+def _(mo):
+    mo.md("""## 3. Training Models""")
     return
 
 
 @app.cell
 def _(mo):
-    mo.md("## 3. Training Models")
+    mo.md(r"""### 3.1 Logistic Regression""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.callout(
+        mo.md("""
+    In Logistic Regression, C is the inverse of regularization strength:
+
+    - **Small C** → Stronger regularization → Simpler model, less overfitting risk, but may underfit.
+    - **Large C** → Weaker regularization → Model fits training data more closely, but may overfit.
+    """),
+        kind="info",
+    )
+    return
+
+
+@app.cell
+def _(
+    LogisticRegression,
+    roc_auc_score,
+    test_data,
+    train_data,
+    y_test,
+    y_train,
+):
+    # 📌 Logistic Regression
+    log_reg = LogisticRegression(C=0.0001)
+    log_reg.fit(train_data, y_train)
+
+    # Train data predicton (class 1)
+    log_reg_train = log_reg.predict_proba(train_data)[:, 1]
+
+    # Test data prediction (class 1)
+    log_reg_test = log_reg.predict_proba(test_data)[:, 1]
+
+    # Get the ROC AUC Score on train and test datasets
+    log_reg_scores = {
+        "train_score": roc_auc_score(y_train, log_reg_train),
+        "test_score": roc_auc_score(y_test, log_reg_test),
+    }
+    log_reg_scores
     return
 
 
