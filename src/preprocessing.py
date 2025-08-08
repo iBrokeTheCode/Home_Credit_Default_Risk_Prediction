@@ -1,6 +1,9 @@
 from numpy import nan, ndarray
 from pandas import DataFrame, concat
+from scipy.sparse import spmatrix
+from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, OrdinalEncoder
 
 
@@ -85,3 +88,75 @@ def preprocess_data(train_df: DataFrame, test_df: DataFrame) -> tuple[ndarray, n
     scaler_test = scaler.transform(aux_test_df)
 
     return scaler_train, scaler_test
+
+
+def preprocess_data_pipeline(
+    train_df: DataFrame, test_df: DataFrame
+) -> tuple[ndarray | spmatrix, ndarray | spmatrix]:
+    """
+    Pre process data for modeling. Receives train and test dataframes, cleans them up, and returns ndarrays with feature engineering already performed.
+
+    Args:
+        train_df (DataFrame): The training dataframe.
+        test_df (DataFrame): The test dataframe.
+
+    Returns:
+        tuple[ndarray, ndarray]: A tuple with the preprocessed train and test data as ndarrays
+    """
+    # Create copies to avoid modifying original dataframes
+    aux_train_df = train_df.copy()
+    aux_test_df = test_df.copy()
+
+    # 📌 [1] Correct outliers/anomalous values in numerical columns
+    aux_train_df["DAYS_EMPLOYED"] = aux_train_df["DAYS_EMPLOYED"].replace({365243: nan})
+    aux_test_df["DAYS_EMPLOYED"] = aux_test_df["DAYS_EMPLOYED"].replace({365243: nan})
+
+    # 📌 [2] Define column types for the ColumnTransformer
+    numerical_cols = aux_train_df.select_dtypes(include="number").columns.to_list()
+    categorical_cols = aux_train_df.select_dtypes(include="object").columns.to_list()
+
+    binary_cols = [col for col in categorical_cols if aux_train_df[col].nunique() == 2]
+    multi_cols = [col for col in categorical_cols if aux_train_df[col].nunique() > 2]
+
+    # 📌 [3] Build the preprocessing pipeline using ColumnTransformer
+    # Create a pipeline for numerical columns: Impute and Scale processes
+    numerical_pipeline = Pipeline(
+        steps=[
+            ("imputer", SimpleImputer(strategy="median")),
+            ("scaler", MinMaxScaler()),
+        ]
+    )
+
+    binary_pipeline = Pipeline(
+        steps=[
+            ("imputer", SimpleImputer(strategy="most_frequent")),
+            ("ordinal", OrdinalEncoder()),
+            ("scaler", MinMaxScaler()),
+        ]
+    )
+
+    multi_pipeline = Pipeline(
+        steps=[
+            ("imputer", SimpleImputer(strategy="most_frequent")),
+            ("onehot", OneHotEncoder(handle_unknown="ignore", sparse_output=False)),
+            ("scaler", MinMaxScaler()),
+        ]
+    )
+
+    #
+    preprocessor = ColumnTransformer(
+        transformers=[
+            # Tuple format: ('name', transformer, list_of_columns)
+            ("numerical", numerical_pipeline, numerical_cols),
+            ("binary", binary_pipeline, binary_cols),
+            ("multi", multi_pipeline, multi_cols),
+        ],
+        remainder="passthrough",
+    )
+
+    # 📌 [4] Fit and transform the data
+    preprocessor.fit(aux_train_df)
+    train_preprocessed = preprocessor.transform(aux_train_df)
+    test_preprocessed = preprocessor.transform(aux_test_df)
+
+    return train_preprocessed, test_preprocessed

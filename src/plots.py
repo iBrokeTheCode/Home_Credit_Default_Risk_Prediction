@@ -167,7 +167,6 @@ def plot_income_type(df: DataFrame) -> Figure:
     sns.countplot(
         data=df, y="NAME_INCOME_TYPE", hue="TARGET", palette=custom_palette[:2]
     )
-    ax1.legend(loc="lower right", title="Target")
     ax1.set_xlabel("Number of Applicants")
     ax1.set_ylabel("Income Type")
     ax1.grid(axis="x", linestyle="--", alpha=0.5)
