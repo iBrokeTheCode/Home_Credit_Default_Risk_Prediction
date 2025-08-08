@@ -39,8 +39,6 @@ def _():
     from src.utils import get_dataset, get_features_target, get_train_test_sets
     from src.preprocessing import preprocess_data_pipeline
     return (
-        LogisticRegression,
-        RandomForestClassifier,
         get_dataset,
         get_features_target,
         get_train_test_sets,
@@ -52,7 +50,6 @@ def _():
         plot_occupation,
         plot_target_distribution,
         preprocess_data_pipeline,
-        roc_auc_score,
     )
 
 
@@ -278,7 +275,7 @@ def _(mo):
 def _(X, get_train_test_sets, y):
     X_train, y_train, X_test, y_test = get_train_test_sets(X, y)
     X_train.shape, y_train.shape, X_test.shape, y_test.shape
-    return X_test, X_train, y_test, y_train
+    return X_test, X_train
 
 
 @app.cell
@@ -310,7 +307,7 @@ def _(X_test, X_train, preprocess_data_pipeline):
         train_df=X_train, test_df=X_test
     )
     train_data.shape, test_data.shape
-    return test_data, train_data
+    return
 
 
 @app.cell
@@ -321,9 +318,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""At this points, we will work with `train_data` and `test_data` as features sets; also `y_train` and `y_test` as target sets."""
-    )
+    mo.md(r"""At this points, we will work with `train_data` and `test_data` as features sets; also `y_train` and `y_test` as target sets.""")
     return
 
 
@@ -348,14 +343,12 @@ def _(mo):
 
 
 @app.cell
-def _(
-    LogisticRegression,
-    roc_auc_score,
-    test_data,
-    train_data,
-    y_test,
-    y_train,
-):
+def _(mo):
+    mo.md(
+        r"""
+    We trained our Logistic Regression model using the following code:
+
+    ```py
     # 📌 Logistic Regression
     log_reg = LogisticRegression(C=0.0001)
     log_reg.fit(train_data, y_train)
@@ -372,6 +365,21 @@ def _(
         "test_score": roc_auc_score(y_test, lr_test_pred),
     }
     log_reg_scores
+    ```
+
+    📈 The ROC AUC scores obtained:
+    """
+    )
+    return
+
+
+@app.cell
+def _():
+    lr_scores = {
+        "train_score": 0.6868418961663535,
+        "test_score": 0.6854973003347028,
+    }
+    lr_scores
     return
 
 
@@ -382,14 +390,12 @@ def _(mo):
 
 
 @app.cell
-def _(
-    RandomForestClassifier,
-    roc_auc_score,
-    test_data,
-    train_data,
-    y_test,
-    y_train,
-):
+def _(mo):
+    mo.md(
+        r"""
+    We trained our Random Forest Classifier model using the following code:
+
+    ```py
     # 📌 Random Forest Classifier
     rf = RandomForestClassifier(random_state=42, n_jobs=-1)
     rf.fit(train_data, y_train)
@@ -401,6 +407,18 @@ def _(
         "train_score": roc_auc_score(y_train, rf_train_pred),
         "test_score": roc_auc_score(y_test, rf_test_pred),
     }
+    rf_scores
+    ```
+
+    📈 The ROC AUC scores obtained:
+    """
+    )
+    return
+
+
+@app.cell
+def _():
+    rf_scores = {"train_score": 1.0, "test_score": 0.7092889612208869}
     rf_scores
     return
 
@@ -415,7 +433,7 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-    We use this code snippet to use `RandomizedSearchCV`:
+    We trained the Randomized Search CV using the following code:
 
     ```py
     param_dist = {"n_estimators": [50, 100, 150], "max_depth": [10, 20, 30]}
@@ -442,14 +460,10 @@ def _(mo):
     }
     rfo_scores
     ```
+
+    📈 The ROC AUC scores obtained:
     """
     )
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""📈 The obtained scores are:""")
     return
 
 
@@ -465,25 +479,18 @@ def _():
 
 @app.cell
 def _(mo):
-    mo.md(r"""🥇The best results are:""")
-    return
-
-
-@app.cell
-def _(RandomForestClassifier):
-    optimized_results = {
-        "best_params_": {"n_estimators": 100, "max_depth": 10},
-        "best_score_": 0.7296259755147781,
-        "best_estimator_": RandomForestClassifier(
-            max_depth=10, n_jobs=-1, random_state=42
-        ),
-    }
-    optimized_results
+    mo.md(r"""🥇The best results:""")
     return
 
 
 @app.cell
 def _():
+    optimized_results = {
+        "best_params_": {"n_estimators": 100, "max_depth": 10},
+        "best_score_": 0.7296259755147781,
+        "best_estimator_": "RandomForestClassifier(max_depth=10, n_jobs=-1, random_state=42)",
+    }
+    optimized_results
     return
 
 

@@ -143,13 +143,13 @@ def preprocess_data_pipeline(
         ]
     )
 
-    #
+    # Create a ColumnTransformer object with the defined pipelines and transformers
     preprocessor = ColumnTransformer(
         transformers=[
             # Tuple format: ('name', transformer, list_of_columns)
-            ("numerical", numerical_pipeline, numerical_cols),
             ("binary", binary_pipeline, binary_cols),
             ("multi", multi_pipeline, multi_cols),
+            ("numerical", numerical_pipeline, numerical_cols),
         ],
         remainder="passthrough",
     )
