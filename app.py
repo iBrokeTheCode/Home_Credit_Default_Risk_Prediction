@@ -636,13 +636,69 @@ def _():
 
 @app.cell
 def _(mo):
-    mo.md(r"""## 4. Conclusion""")
+    mo.md(r"""## 4. Model Performance Analysis""")
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(r"""...""")
+    mo.md(
+        r"""
+    ### 4.1 Logistic Regression
+
+    The Logistic Regression model shows a `train_score` of 0.687 and a `test_score` of 0.685.
+
+    **Interpretation:** This model's performance is consistent across the training and testing sets, as indicated by the very small gap between the scores. This means the model is not overfitting. However, the overall scores are relatively low for a binary classification task, suggesting that the model is likely **underfitting**. It's too simple to capture the underlying patterns in the data effectively.
+
+    ### 4.2 Random Forest Classifier
+
+    The base Random Forest model produced a `train_score` of 1.0 and a `test_score` of 0.707.
+
+    **Interpretation:** The perfect `train_score` of 1.0 is a clear and severe sign of **overfitting**. The model has essentially memorized the training data, and this does not generalize well to unseen data, as shown by the much lower `test_score`. While the test score is better than the Logistic Regression, the model is too complex and needs to be regularized or tuned to perform better.
+
+    ### 4.3 Randomized Search with Cross Validations (Random Forest)
+
+    The hyperparameter-tuned Random Forest model achieved a `train_score` of 0.820 and a `test_score` of 0.731.
+
+    **Interpretation:** This is a much better result than the base Random Forest. The gap between the `train_score` and `test_score` is significantly smaller, indicating that the hyperparameter tuning successfully **reduced overfitting**. The `test_score` of 0.731 is also a notable improvement, showing that the model now generalizes better to unseen data. This is a well-performing and well-tuned model.
+
+    ### 4.4 LightGBM
+
+    The LightGBM model produced a `train_score` of 0.852 and a `test_score` of 0.751.
+
+    **Interpretation:** The LightGBM model shows the best overall performance with the highest `test_score` of 0.751. There is a small gap between the training and testing scores, which is normal for a powerful boosting model, suggesting a good balance between capturing complex patterns and generalizing well. The model is performing exceptionally and is neither severely overfitting nor underfitting.
+    """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""## 5. Conclusion: Final Model Selection""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    Based on a comparison of all the models, the final model selection is clear.
+
+    | Model | Train Score (AUC ROC) | Test Score (AUC ROC) |
+    | :--- | :---: | :---: |
+    | Logistic Regression | 0.687 | 0.685 |
+    | Random Forest Classifier | 1.000 | 0.707 |
+    | Randomized Search (Tuned RF) | 0.820 | 0.731 |
+    | **LightGBM** | 0.852 | **0.751** |
+
+    * The **Logistic Regression** model performed poorly due to underfitting.
+    * The base **Random Forest** model, while better, suffered from severe overfitting.
+    * The tuned **Random Forest** model was a significant improvement and a strong contender, achieving a solid `test_score`.
+    * However, the **LightGBM** model ultimately demonstrated the best performance, achieving the highest **ROC AUC test score of 0.751**. This indicates that it is the most robust and accurate model for predicting loan repayment risk on unseen data.
+
+    Therefore, we will select the **LightGBM** model as our final choice for deployment.
+    """
+    )
     return
 
 
