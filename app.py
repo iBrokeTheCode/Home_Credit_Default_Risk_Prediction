@@ -22,10 +22,17 @@ def _():
     import pandas as pd
     import seaborn as sns
 
+    from sklearn.ensemble import RandomForestClassifier
     from sklearn.linear_model import LogisticRegression
     from sklearn.metrics import roc_auc_score
-    from sklearn.ensemble import RandomForestClassifier
     from sklearn.model_selection import RandomizedSearchCV
+
+    from sklearn.pipeline import Pipeline
+    from sklearn.compose import ColumnTransformer
+    from sklearn.impute import SimpleImputer
+    from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, OrdinalEncoder
+
+    from lightgbm import LGBMClassifier
 
     from src.plots import (
         plot_target_distribution,
@@ -183,6 +190,14 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    mo.md(
+        r"""Want to see how these plots were created? You can find the source code for the visualizations in [plots.py](./src/plots.py)."""
+    )
+    return
+
+
+@app.cell
+def _(mo):
     mo.md("""**a. Credit Amounts**""")
     return
 
@@ -299,6 +314,8 @@ def _(mo):
         - One Hot Encoding for more than 2 categories.
     - Impute values for all columns with missing data (using median as imputing value).
     - Feature scaling with Min-Max scaler
+
+    Want to see how the dataset was processed? You can find the code for the preprocessing steps in [preprocessing.py](./src/preprocessing.py).
     """
     )
     return
@@ -441,6 +458,7 @@ def _(mo):
     We trained the Randomized Search CV using the following code:
 
     ```py
+    # 📌 RandomizedSearchCV
     param_dist = {"n_estimators": [50, 100, 150], "max_depth": [10, 20, 30]}
 
     rf_optimized = RandomForestClassifier(random_state=42, n_jobs=-1)
@@ -496,6 +514,114 @@ def _():
         "best_estimator_": "RandomForestClassifier(max_depth=10, n_jobs=-1, random_state=42)",
     }
     optimized_results
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### 3.4 LightGBM""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    We trained our LightGBM Classifier model using the following code:
+
+    ```py
+    # 📌 LightGBM
+    import warnings
+
+    warnings.filterwarnings(
+        "ignore", message="X does not have valid feature names"
+    )
+
+    # 📌 Get numerical and categorical variables (binary and mutiple)
+    num_cols = X_train.select_dtypes(include="number").columns.to_list()
+    cat_cols = X_train.select_dtypes(include="object").columns.to_list()
+
+    binary_cols = [col for col in cat_cols if X_train[col].nunique() == 2]
+    multi_cols = [col for col in cat_cols if X_train[col].nunique() > 2]
+
+    # 📌 [1] Create the pipelines for different data types
+    numerical_pipeline = Pipeline(
+        steps=[
+            ("imputer", SimpleImputer(strategy="median")),
+            ("scaler", MinMaxScaler()),
+        ]
+    )
+
+    binary_pipeline = Pipeline(
+        steps=[
+            ("imputer", SimpleImputer(strategy="most_frequent")),
+            ("ordinal", OrdinalEncoder()),
+            ("scaler", MinMaxScaler()),
+        ]
+    )
+
+    multi_pipeline = Pipeline(
+        steps=[
+            ("imputer", SimpleImputer(strategy="most_frequent")),
+            (
+                "onehot",
+                OneHotEncoder(handle_unknown="ignore", sparse_output=False),
+            ),
+            ("scaler", MinMaxScaler()),
+        ]
+    )
+
+    # 📌 [2] Create the preprocessor using ColumnTransformer
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ("binary", binary_pipeline, binary_cols),
+            ("multi", multi_pipeline, multi_cols),
+            ("numerical", numerical_pipeline, num_cols),
+        ],
+        remainder="passthrough",
+    )
+
+    # 📌 [3] Create the Final Pipeline that combines the preprocessor and the model
+    lgbm = LGBMClassifier(
+        n_estimators=500,
+        learning_rate=0.05,
+        max_depth=-1,
+        random_state=42,
+        class_weight="balanced",
+        n_jobs=-1,
+    )
+
+    lgbm_pipeline = Pipeline(
+        steps=[("preprocessor", preprocessor), ("classifier", lgbm)]
+    )
+
+    # 📌 [4] Fit the Final Pipeline on the ORIGINAL, unprocessed data
+    # The pipeline takes care of all the preprocessing internally.
+    lgbm_pipeline.fit(X_train, y_train)
+
+    lgbm_train_pred = lgbm_pipeline.predict_proba(X_train)[:, 1]
+    lgbm_test_pred = lgbm_pipeline.predict_proba(X_test)[:, 1]
+
+    lgbm_scores = {
+        "train_score": roc_auc_score(y_train, lgbm_train_pred),
+        "test_score": roc_auc_score(y_test, lgbm_test_pred),
+    }
+    lgbm_scores
+    ```
+
+    📈 The ROC AUC scores obtained:
+    """
+    )
+    return
+
+
+@app.cell
+def _():
+    lgbm_scores = {
+        "train_score": 0.8523466410959462,
+        "test_score": 0.7514895868142193,
+    }
+    lgbm_scores
     return
 
 
