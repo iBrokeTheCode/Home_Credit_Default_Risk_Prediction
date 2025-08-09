@@ -191,7 +191,7 @@ def _(mo):
 @app.cell
 def _(mo):
     mo.md(
-        r"""Want to see how these plots were created? You can find the source code for the visualizations in [plots.py](./src/plots.py)."""
+        r"""Want to see how these plots were created? You can find the source code for the visualizations in [plots.py](https://huggingface.co/spaces/iBrokeTheCode/Home_Credit_Default_Risk_Prediction/blob/main/src/plots.py)."""
     )
     return
 
@@ -315,7 +315,7 @@ def _(mo):
     - Impute values for all columns with missing data (using median as imputing value).
     - Feature scaling with Min-Max scaler
 
-    Want to see how the dataset was processed? You can find the code for the preprocessing steps in [preprocessing.py](./src/preprocessing.py).
+    Want to see how the dataset was processed? You can find the code for the preprocessing steps in [preprocessing.py]([./src/preprocessing.py](https://huggingface.co/spaces/iBrokeTheCode/Home_Credit_Default_Risk_Prediction/blob/main/src/preprocessing.py)).
     """
     )
     return
