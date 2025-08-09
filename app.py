@@ -18,9 +18,7 @@ def _(mo):
 
 @app.cell
 def _():
-    import matplotlib.pyplot as plt
     import pandas as pd
-    import seaborn as sns
 
     from sklearn.ensemble import RandomForestClassifier
     from sklearn.linear_model import LogisticRegression
@@ -42,7 +40,6 @@ def _():
         plot_family_status,
         plot_income_type,
     )
-    from src.theme import custom_palette
     from src.utils import get_dataset, get_features_target, get_train_test_sets
     from src.preprocessing import preprocess_data_pipeline
     return (
@@ -70,6 +67,18 @@ def _(get_dataset, get_features_target):
 @app.cell
 def _(mo):
     mo.md("""## 1. Exploratory Data Analysis""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.callout(
+        kind="info",
+        value=mo.md(
+            """💡 **Want a step-by-step walkthrough instead?**   
+        Check the Jupyter notebook version here: 👉 [Jupyter notebook](https://huggingface.co/spaces/iBrokeTheCode/Home_Credit_Default_Risk_Prediction/blob/main/tutorial_app.ipynb)""",
+        ),
+    )
     return
 
 
@@ -440,7 +449,7 @@ def _(mo):
 
 @app.cell
 def _():
-    rf_scores = {"train_score": 1.0, "test_score": 0.7092889612208869}
+    rf_scores = {"train_score": 1.0, "test_score": 0.7066811557903828}
     rf_scores
     return
 
@@ -493,8 +502,8 @@ def _(mo):
 @app.cell
 def _():
     rfo_scores = {
-        "train_score": 0.820563139010308,
-        "test_score": 0.7304320776838898,
+        "train_score": 0.8196620915431655,
+        "test_score": 0.7308385425476998,
     }
     rfo_scores
     return
@@ -622,6 +631,18 @@ def _():
         "test_score": 0.7514895868142193,
     }
     lgbm_scores
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""## 4. Conclusion""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""...""")
     return
 
 
