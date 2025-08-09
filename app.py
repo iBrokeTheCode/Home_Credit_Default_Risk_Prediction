@@ -109,7 +109,10 @@ def _(mo):
 @app.cell
 def _(X):
     sample = X.head(5).T
-    sample.columns = [str(col) for col in sample.columns]
+    sample.columns = [
+        str(col) for col in sample.columns
+    ]  # fix integer name warning
+    sample = sample.astype(str)  # avoid numeric conversion issues in viewer
     sample
     return
 
@@ -318,7 +321,9 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(r"""At this points, we will work with `train_data` and `test_data` as features sets; also `y_train` and `y_test` as target sets.""")
+    mo.md(
+        r"""At this points, we will work with `train_data` and `test_data` as features sets; also `y_train` and `y_test` as target sets."""
+    )
     return
 
 
