@@ -324,7 +324,7 @@ def _(mo):
     - Impute values for all columns with missing data (using median as imputing value).
     - Feature scaling with Min-Max scaler
 
-    Want to see how the dataset was processed? You can find the code for the preprocessing steps in [preprocessing.py]([./src/preprocessing.py](https://huggingface.co/spaces/iBrokeTheCode/Home_Credit_Default_Risk_Prediction/blob/main/src/preprocessing.py)).
+    Want to see how the dataset was processed? You can find the code for the preprocessing steps in [preprocessing.py](https://huggingface.co/spaces/iBrokeTheCode/Home_Credit_Default_Risk_Prediction/blob/main/src/preprocessing.py).
     """
     )
     return
@@ -689,7 +689,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(r"""## 5. Conclusion: Final Model Selection""")
+    mo.md(r"""## 5. Conclusion""")
     return
 
 
@@ -710,9 +710,16 @@ def _(mo):
     * The base **Random Forest** model, while better, suffered from severe overfitting.
     * The tuned **Random Forest** model was a significant improvement and a strong contender, achieving a solid `test_score`.
     * However, the **LightGBM** model ultimately demonstrated the best performance, achieving the highest **ROC AUC test score of 0.751**. This indicates that it is the most robust and accurate model for predicting loan repayment risk on unseen data.
-
-    Therefore, we will select the **LightGBM** model as our final choice for deployment.
     """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.callout(
+        kind="success",
+        value="🥇 Therefore, we will select the LightGBM model as our final choice for deployment.",
     )
     return
 
