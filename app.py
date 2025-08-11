@@ -6,67 +6,396 @@ app = marimo.App()
 
 @app.cell
 def _():
+    import joblib
+    import warnings
+
     import marimo as mo
-    return (mo,)
+    import pandas as pd
+
+    warnings.filterwarnings(
+        "ignore", message="X does not have valid feature names"
+    )
+    return joblib, mo, pd
 
 
 @app.cell
 def _(mo):
-    mo.center(mo.md("# Home Credit Default Risk Prediction"))
+    mo.center(mo.md("# 🏦 Home Credit Default Risk Prediction"))
     return
 
 
 @app.cell
-def _():
-    import pandas as pd
-
-    from sklearn.ensemble import RandomForestClassifier
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.metrics import roc_auc_score
-    from sklearn.model_selection import RandomizedSearchCV
-
-    from sklearn.pipeline import Pipeline
-    from sklearn.compose import ColumnTransformer
-    from sklearn.impute import SimpleImputer
-    from sklearn.preprocessing import MinMaxScaler, OneHotEncoder, OrdinalEncoder
-
-    from lightgbm import LGBMClassifier
-
-    from src.plots import (
-        plot_target_distribution,
-        plot_credit_amounts,
-        plot_education_levels,
-        plot_occupation,
-        plot_family_status,
-        plot_income_type,
-    )
-    from src.utils import get_dataset, get_features_target, get_train_test_sets
-    from src.preprocessing import preprocess_data_pipeline
-    return (
-        get_dataset,
-        get_features_target,
-        get_train_test_sets,
-        pd,
-        plot_credit_amounts,
-        plot_education_levels,
-        plot_family_status,
-        plot_income_type,
-        plot_occupation,
-        plot_target_distribution,
-        preprocess_data_pipeline,
-    )
+def _(mo):
+    mo.Html("<br><hr><br>")
+    return
 
 
 @app.cell
-def _(get_dataset, get_features_target):
-    df = get_dataset()
-    X, y = get_features_target(df)
-    return X, df, y
+def _(joblib, mo):
+    # 📌 [1] Load the saved model pipeline
+    with mo.redirect_stdout():
+        loaded_pipeline = joblib.load("./model/lgbm_model.joblib")
+    return (loaded_pipeline,)
+
+
+@app.cell
+def _():
+    # 📌 [2] Define the default values for all other features
+    default_values = {
+        "SK_ID_CURR": 277659.5,
+        "CNT_CHILDREN": 0.0,
+        "AMT_INCOME_TOTAL": 147150.0,
+        "AMT_CREDIT": 512997.75,
+        "AMT_ANNUITY": 24885.0,
+        "AMT_GOODS_PRICE": 450000.0,
+        "REGION_POPULATION_RELATIVE": 0.01885,
+        "DAYS_BIRTH": -15743.5,
+        "DAYS_EMPLOYED": -1219.0,
+        "DAYS_REGISTRATION": -4492.0,
+        "DAYS_ID_PUBLISH": -3254.0,
+        "OWN_CAR_AGE": 9.0,
+        "FLAG_MOBIL": 1.0,
+        "FLAG_EMP_PHONE": 1.0,
+        "FLAG_WORK_PHONE": 0.0,
+        "FLAG_CONT_MOBILE": 1.0,
+        "FLAG_PHONE": 0.0,
+        "FLAG_EMAIL": 0.0,
+        "CNT_FAM_MEMBERS": 2.0,
+        "REGION_RATING_CLIENT": 2.0,
+        "REGION_RATING_CLIENT_W_CITY": 2.0,
+        "HOUR_APPR_PROCESS_START": 12.0,
+        "REG_REGION_NOT_LIVE_REGION": 0.0,
+        "REG_REGION_NOT_WORK_REGION": 0.0,
+        "LIVE_REGION_NOT_WORK_REGION": 0.0,
+        "REG_CITY_NOT_LIVE_CITY": 0.0,
+        "REG_CITY_NOT_WORK_CITY": 0.0,
+        "LIVE_CITY_NOT_WORK_CITY": 0.0,
+        "EXT_SOURCE_1": 0.5068839442599388,
+        "EXT_SOURCE_2": 0.5662837032261614,
+        "EXT_SOURCE_3": 0.5370699579791587,
+        "APARTMENTS_AVG": 0.0876,
+        "BASEMENTAREA_AVG": 0.0764,
+        "YEARS_BEGINEXPLUATATION_AVG": 0.9816,
+        "YEARS_BUILD_AVG": 0.7552,
+        "COMMONAREA_AVG": 0.0211,
+        "ELEVATORS_AVG": 0.0,
+        "ENTRANCES_AVG": 0.1379,
+        "FLOORSMAX_AVG": 0.1667,
+        "FLOORSMIN_AVG": 0.2083,
+        "LANDAREA_AVG": 0.0483,
+        "LIVINGAPARTMENTS_AVG": 0.0756,
+        "LIVINGAREA_AVG": 0.0746,
+        "NONLIVINGAPARTMENTS_AVG": 0.0,
+        "NONLIVINGAREA_AVG": 0.0035,
+        "APARTMENTS_MODE": 0.084,
+        "BASEMENTAREA_MODE": 0.0748,
+        "YEARS_BEGINEXPLUATATION_MODE": 0.9816,
+        "YEARS_BUILD_MODE": 0.7648,
+        "COMMONAREA_MODE": 0.0191,
+        "ELEVATORS_MODE": 0.0,
+        "ENTRANCES_MODE": 0.1379,
+        "FLOORSMAX_MODE": 0.1667,
+        "FLOORSMIN_MODE": 0.2083,
+        "LANDAREA_MODE": 0.0459,
+        "LIVINGAPARTMENTS_MODE": 0.0771,
+        "LIVINGAREA_MODE": 0.0731,
+        "NONLIVINGAPARTMENTS_MODE": 0.0,
+        "NONLIVINGAREA_MODE": 0.0011,
+        "APARTMENTS_MEDI": 0.0864,
+        "BASEMENTAREA_MEDI": 0.0761,
+        "YEARS_BEGINEXPLUATATION_MEDI": 0.9816,
+        "YEARS_BUILD_MEDI": 0.7585,
+        "COMMONAREA_MEDI": 0.0209,
+        "ELEVATORS_MEDI": 0.0,
+        "ENTRANCES_MEDI": 0.1379,
+        "FLOORSMAX_MEDI": 0.1667,
+        "FLOORSMIN_MEDI": 0.2083,
+        "LANDAREA_MEDI": 0.0488,
+        "LIVINGAPARTMENTS_MEDI": 0.0765,
+        "LIVINGAREA_MEDI": 0.0749,
+        "NONLIVINGAPARTMENTS_MEDI": 0.0,
+        "NONLIVINGAREA_MEDI": 0.003,
+        "TOTALAREA_MODE": 0.0687,
+        "OBS_30_CNT_SOCIAL_CIRCLE": 0.0,
+        "DEF_30_CNT_SOCIAL_CIRCLE": 0.0,
+        "OBS_60_CNT_SOCIAL_CIRCLE": 0.0,
+        "DEF_60_CNT_SOCIAL_CIRCLE": 0.0,
+        "DAYS_LAST_PHONE_CHANGE": -755.0,
+        "FLAG_DOCUMENT_2": 0.0,
+        "FLAG_DOCUMENT_3": 1.0,
+        "FLAG_DOCUMENT_4": 0.0,
+        "FLAG_DOCUMENT_5": 0.0,
+        "FLAG_DOCUMENT_6": 0.0,
+        "FLAG_DOCUMENT_7": 0.0,
+        "FLAG_DOCUMENT_8": 0.0,
+        "FLAG_DOCUMENT_9": 0.0,
+        "FLAG_DOCUMENT_10": 0.0,
+        "FLAG_DOCUMENT_11": 0.0,
+        "FLAG_DOCUMENT_12": 0.0,
+        "FLAG_DOCUMENT_13": 0.0,
+        "FLAG_DOCUMENT_14": 0.0,
+        "FLAG_DOCUMENT_15": 0.0,
+        "FLAG_DOCUMENT_16": 0.0,
+        "FLAG_DOCUMENT_17": 0.0,
+        "FLAG_DOCUMENT_18": 0.0,
+        "FLAG_DOCUMENT_19": 0.0,
+        "FLAG_DOCUMENT_20": 0.0,
+        "FLAG_DOCUMENT_21": 0.0,
+        "AMT_REQ_CREDIT_BUREAU_HOUR": 0.0,
+        "AMT_REQ_CREDIT_BUREAU_DAY": 0.0,
+        "AMT_REQ_CREDIT_BUREAU_WEEK": 0.0,
+        "AMT_REQ_CREDIT_BUREAU_MON": 0.0,
+        "AMT_REQ_CREDIT_BUREAU_QRT": 0.0,
+        "AMT_REQ_CREDIT_BUREAU_YEAR": 1.0,
+        "NAME_CONTRACT_TYPE": "Cash loans",
+        "CODE_GENDER": "F",
+        "FLAG_OWN_CAR": "N",
+        "FLAG_OWN_REALTY": "Y",
+        "NAME_TYPE_SUITE": "Unaccompanied",
+        "NAME_INCOME_TYPE": "Working",
+        "NAME_EDUCATION_TYPE": "Secondary / secondary special",
+        "NAME_FAMILY_STATUS": "Married",
+        "NAME_HOUSING_TYPE": "House / apartment",
+        "OCCUPATION_TYPE": "Laborers",
+        "WEEKDAY_APPR_PROCESS_START": "TUESDAY",
+        "ORGANIZATION_TYPE": "Business Entity Type 3",
+        "FONDKAPREMONT_MODE": "reg oper account",
+        "HOUSETYPE_MODE": "block of flats",
+        "WALLSMATERIAL_MODE": "Panel",
+        "EMERGENCYSTATE_MODE": "No",
+    }
+    return (default_values,)
 
 
 @app.cell
 def _(mo):
-    mo.md("""## 1. Exploratory Data Analysis""")
+    # 📌 [3] Create widgets for the top 10 features
+    EXT_SOURCE_3 = mo.ui.slider(
+        start=0.00,
+        stop=0.90,
+        step=0.01,
+        value=0.5,
+        label="EXT_SOURCE_3",
+    )
+
+    EXT_SOURCE_2 = mo.ui.slider(
+        start=0.00,
+        stop=0.86,
+        step=0.01,
+        value=0.5,
+        label="EXT_SOURCE_2",
+    )
+
+    DAYS_BIRTH = mo.ui.slider(
+        start=-25229,
+        stop=-7673,
+        value=-15743,
+        label="DAYS_BIRTH",
+    )
+
+    EXT_SOURCE_1 = mo.ui.slider(
+        start=0.01,
+        stop=0.97,
+        step=0.01,
+        value=0.5,
+        label="EXT_SOURCE_1",
+    )
+
+    AMT_ANNUITY = mo.ui.slider(
+        start=1980,
+        stop=258025,
+        step=100,
+        value=24885,
+        label="AMT_ANNUITY",
+    )
+
+    AMT_CREDIT = mo.ui.slider(
+        start=45000,
+        stop=4050000,
+        step=50000,
+        value=512997,
+        label="AMT_CREDIT",
+    )
+
+    DAYS_EMPLOYED = mo.ui.slider(
+        start=-17583,
+        stop=365243,
+        value=-1219,
+        label="DAYS_EMPLOYED",
+    )
+
+    DAYS_ID_PUBLISH = mo.ui.slider(
+        start=-7197,
+        stop=0,
+        value=-3254,
+        label="DAYS_ID_PUBLISH",
+    )
+
+    DAYS_REGISTRATION = mo.ui.slider(
+        start=-24672,
+        stop=0,
+        value=-4492,
+        label="DAYS_REGISTRATION",
+    )
+
+    SK_ID_CURR = mo.ui.slider(
+        start=100003,
+        stop=456253,
+        step=100,
+        value=277659,
+        label="SK_ID_CURR",
+    )
+
+    features_widgets = {
+        "EXT_SOURCE_3": EXT_SOURCE_3,
+        "EXT_SOURCE_2": EXT_SOURCE_2,
+        "DAYS_BIRTH": DAYS_BIRTH,
+        "EXT_SOURCE_1": EXT_SOURCE_1,
+        "AMT_ANNUITY": AMT_ANNUITY,
+        "AMT_CREDIT": AMT_CREDIT,
+        "DAYS_EMPLOYED": DAYS_EMPLOYED,
+        "DAYS_ID_PUBLISH": DAYS_ID_PUBLISH,
+        "DAYS_REGISTRATION": DAYS_REGISTRATION,
+        "SK_ID_CURR": SK_ID_CURR,
+    }
+    return (features_widgets,)
+
+
+@app.cell
+def _(features_widgets, mo):
+    # 📌 [4] Create the form with the sliders
+    sliders_form = (
+        mo.md("""
+        ### Enter Client Information
+
+        {EXT_SOURCE_3}
+        {EXT_SOURCE_2}
+        {DAYS_BIRTH}
+        {EXT_SOURCE_1}
+        {AMT_ANNUITY}
+        {AMT_CREDIT}
+        {DAYS_EMPLOYED}
+        {DAYS_ID_PUBLISH}
+        {DAYS_REGISTRATION}
+        {SK_ID_CURR}
+        """)
+        .batch(**features_widgets)  # Pass the dict unpacked
+        .form(show_clear_button=True, bordered=True)
+    )
+    return (sliders_form,)
+
+
+@app.cell
+def _(sliders_form):
+    # 📌 [5] Display the form
+    sliders_form
+    return
+
+
+@app.cell
+def _(default_values, loaded_pipeline, mo, pd, sliders_form):
+    # 📌 [6] Get prediction from model
+    probability = None
+
+    # Process form submission
+    if sliders_form.value is not None:
+        # Copy default values
+        prediction_data = default_values.copy()
+
+        # Update with sliders' submitted values
+        prediction_data.update(sliders_form.value)
+
+        # Create a DataFrame
+        predict_df = pd.DataFrame([prediction_data])
+
+        # Predict probability
+        probability = loaded_pipeline.predict_proba(predict_df)[:, 1][0]
+    else:
+        mo.md("Fill in the form and click **Submit** to get a prediction.")
+    return (probability,)
+
+
+@app.cell
+def _(probability):
+    # 📌 [7] Display prediction results
+    prob_percent = 70.12
+    risk = "High Risk"
+    direction = "decrease"
+
+    if probability is not None:
+        prob_percent = round(probability * 100, 2)
+
+        # Define risk category
+        if probability < 0.34:
+            risk = "Low Risk"
+            direction = "increase"
+        elif probability < 0.67:
+            risk = "Medium Risk"
+            direction = None
+        else:
+            risk = "High Risk"
+            direction = "decrease"
+    return direction, prob_percent, risk
+
+
+@app.cell
+def _(mo):
+    mo.Html("<br>")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("## 🔮 Credit Risk Prediction")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.Html("<hr><br>")
+    return
+
+
+@app.cell
+def _(direction, mo, prob_percent, risk):
+    interpretation_text = f"""This means there is a {prob_percent}% chance the client will **default on their loan**.  
+    Risk level is categorized as **{risk}**, which can help guide loan approval decisions.
+    """
+
+    result_stat = mo.stat(
+        label="🎲 Probability of Payment Difficulties",
+        bordered=True,
+        value=f"{prob_percent}%",
+        caption=risk,
+        direction=direction,
+    )
+
+    interpretation_stat = mo.stat(
+        label="💡 Interpretation",
+        bordered=True,
+        value="",
+        caption=interpretation_text,
+    )
+    return interpretation_stat, result_stat
+
+
+@app.cell
+def _(interpretation_stat, mo, result_stat):
+    mo.vstack(
+        items=[
+            mo.hstack(
+                items=[result_stat, interpretation_stat], widths="equal", gap=1
+            ),
+        ],
+        gap=1,
+        heights="equal",
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.Html("<br><hr>")
     return
 
 
@@ -84,559 +413,13 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md("""### 1.1 Dataset Information""")
+    mo.md(r"""## 🚀 Model Selection""")
     return
 
 
 @app.cell
 def _(mo):
-    mo.md("""**a. Shape of the train and test datasets**""")
-    return
-
-
-@app.cell
-def _(X_test, X_train, df):
-    train_samples = "Train dataset samples: {}".format(X_train.shape[0])
-    test_samples = "Test dataset samples: {}".format(X_test.shape[0])
-    columns_number = "Number of columns: {}".format(df.shape[1])
-
-    train_samples, test_samples, columns_number
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md("""**b. Dataset features**""")
-    return
-
-
-@app.cell
-def _(X):
-    X.columns
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md("""**c. Sample from dataset**""")
-    return
-
-
-@app.cell
-def _(X):
-    sample = X.head(5).T
-    sample.columns = [
-        str(col) for col in sample.columns
-    ]  # fix integer name warning
-    sample = sample.astype(str)  # avoid numeric conversion issues in viewer
-    sample
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md("""**d. Target variable Distribution**""")
-    return
-
-
-@app.cell
-def _(df, plot_target_distribution):
-    target_table, target_plot = plot_target_distribution(df=df)
-    target_table
-    return (target_plot,)
-
-
-@app.cell
-def _(target_plot):
-    target_plot
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md("""**e. Number of columns of each data type**""")
-    return
-
-
-@app.cell
-def _(X):
-    X.dtypes.value_counts().sort_values(ascending=False)
-    return
-
-
-@app.cell
-def _(X):
-    categorical_cols = (
-        X.select_dtypes(include=["object"]).nunique().sort_values(ascending=False)
-    )
-    categorical_cols
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md("""**f. Missing data**""")
-    return
-
-
-@app.cell
-def _(X, pd):
-    missing_count = X.isna().sum().sort_values(ascending=False)
-    missing_percentage = (missing_count / X.shape[0] * 100).round(2)
-
-    missing_data = pd.DataFrame(
-        data={"Count": missing_count, "percentage": missing_percentage}
-    )
-    missing_data
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md("""### 1.2 Distribution of Variables""")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""Want to see how these plots were created? You can find the source code for the visualizations in [plots.py](https://huggingface.co/spaces/iBrokeTheCode/Home_Credit_Default_Risk_Prediction/blob/main/src/plots.py)."""
-    )
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md("""**a. Credit Amounts**""")
-    return
-
-
-@app.cell
-def _(X, plot_credit_amounts):
-    plot_credit_amounts(df=X)
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md("""**b. Education Level of Credit Applicants**""")
-    return
-
-
-@app.cell
-def _(X, plot_education_levels):
-    education_table, education_plot = plot_education_levels(df=X)
-    education_table
-    return (education_plot,)
-
-
-@app.cell
-def _(education_plot):
-    education_plot
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md("""**c. Ocupation of Credit Applicants**""")
-    return
-
-
-@app.cell
-def _(X, plot_occupation):
-    occupation_table, occupation_plot = plot_occupation(df=X)
-    occupation_table
-    return (occupation_plot,)
-
-
-@app.cell
-def _(occupation_plot):
-    occupation_plot
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md("""**d. Family Status of Applicants**""")
-    return
-
-
-@app.cell
-def _(X, plot_family_status):
-    family_status_table, family_status_plot = plot_family_status(df=X)
-    family_status_table
-    return (family_status_plot,)
-
-
-@app.cell
-def _(family_status_plot):
-    family_status_plot
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md("""**e. Income Type of Applicants by Target Variable**""")
-    return
-
-
-@app.cell
-def _(df, plot_income_type):
-    plot_income_type(df=df)
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md("""## 2. Preprocessing""")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md("""**a. Separate Train and Test Datasets**""")
-    return
-
-
-@app.cell
-def _(X, get_train_test_sets, y):
-    X_train, y_train, X_test, y_test = get_train_test_sets(X, y)
-    X_train.shape, y_train.shape, X_test.shape, y_test.shape
-    return X_test, X_train
-
-
-@app.cell
-def _(mo):
-    mo.md("""**b. Preprocess Data**""")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-    This preprocessing perform:
-
-    - Correct outliers/anomalous values in numerical columns (`DAYS_EMPLOYED` column).
-    - Encode string categorical features (`dtype object`).
-        - If the feature has 2 categories, Binary Encoding is applied.
-        - One Hot Encoding for more than 2 categories.
-    - Impute values for all columns with missing data (using median as imputing value).
-    - Feature scaling with Min-Max scaler
-
-    Want to see how the dataset was processed? You can find the code for the preprocessing steps in [preprocessing.py](https://huggingface.co/spaces/iBrokeTheCode/Home_Credit_Default_Risk_Prediction/blob/main/src/preprocessing.py).
-    """
-    )
-    return
-
-
-@app.cell
-def _(X_test, X_train, preprocess_data_pipeline):
-    train_data, test_data = preprocess_data_pipeline(
-        train_df=X_train, test_df=X_test
-    )
-    train_data.shape, test_data.shape
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md("""## 3. Training Models""")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""At this points, we will work with `train_data` and `test_data` as features sets; also `y_train` and `y_test` as target sets."""
-    )
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""### 3.1 Logistic Regression""")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.callout(
-        mo.md("""
-    In Logistic Regression, C is the inverse of regularization strength:
-
-    - **Small C** → Stronger regularization → Simpler model, less overfitting risk, but may underfit.
-    - **Large C** → Weaker regularization → Model fits training data more closely, but may overfit.
-    """),
-        kind="info",
-    )
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-    We trained our Logistic Regression model using the following code:
-
-    ```py
-    # 📌 Logistic Regression
-    log_reg = LogisticRegression(C=0.0001)
-    log_reg.fit(train_data, y_train)
-
-    # Train data predicton (class 1)
-    lr_train_pred = log_reg.predict_proba(train_data)[:, 1]
-
-    # Test data prediction (class 1)
-    lr_test_pred = log_reg.predict_proba(test_data)[:, 1]
-
-    # Get the ROC AUC Score on train and test datasets
-    log_reg_scores = {
-        "train_score": roc_auc_score(y_train, lr_train_pred),
-        "test_score": roc_auc_score(y_test, lr_test_pred),
-    }
-    log_reg_scores
-    ```
-
-    📈 The ROC AUC scores obtained:
-    """
-    )
-    return
-
-
-@app.cell
-def _():
-    lr_scores = {
-        "train_score": 0.6868418961663535,
-        "test_score": 0.6854973003347028,
-    }
-    lr_scores
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""### 3.2 Random Forest Classifier""")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-    We trained our Random Forest Classifier model using the following code:
-
-    ```py
-    # 📌 Random Forest Classifier
-    rf = RandomForestClassifier(random_state=42, n_jobs=-1)
-    rf.fit(train_data, y_train)
-
-    rf_train_pred = rf.predict_proba(train_data)[:, 1]
-    rf_test_pred = rf.predict_proba(test_data)[:, 1]
-
-    rf_scores = {
-        "train_score": roc_auc_score(y_train, rf_train_pred),
-        "test_score": roc_auc_score(y_test, rf_test_pred),
-    }
-    rf_scores
-    ```
-
-    📈 The ROC AUC scores obtained:
-    """
-    )
-    return
-
-
-@app.cell
-def _():
-    rf_scores = {"train_score": 1.0, "test_score": 0.7066811557903828}
-    rf_scores
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""### 3.3. Randomized Search with Cross Validations""")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-    We trained the Randomized Search CV using the following code:
-
-    ```py
-    # 📌 RandomizedSearchCV
-    param_dist = {"n_estimators": [50, 100, 150], "max_depth": [10, 20, 30]}
-
-    rf_optimized = RandomForestClassifier(random_state=42, n_jobs=-1)
-    rscv = RandomizedSearchCV(
-        estimator=rf_optimized,
-        param_distributions=param_dist,
-        n_iter=5,
-        scoring="roc_auc",
-        cv=3,
-        random_state=42,
-        n_jobs=-1,
-    )
-
-    rscv.fit(train_data, y_train)
-
-    rfo_train_pred = rscv.predict_proba(train_data)[:, 1]
-    rfo_test_pred = rscv.predict_proba(test_data)[:, 1]
-
-    rfo_scores = {
-        "train_score": roc_auc_score(y_train, rfo_train_pred),
-        "test_score": roc_auc_score(y_test, rfo_test_pred),
-    }
-    rfo_scores
-    ```
-
-    📈 The ROC AUC scores obtained:
-    """
-    )
-    return
-
-
-@app.cell
-def _():
-    rfo_scores = {
-        "train_score": 0.8196620915431655,
-        "test_score": 0.7308385425476998,
-    }
-    rfo_scores
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""🥇The best results:""")
-    return
-
-
-@app.cell
-def _():
-    optimized_results = {
-        "best_params_": {"n_estimators": 100, "max_depth": 10},
-        "best_score_": 0.7296259755147781,
-        "best_estimator_": "RandomForestClassifier(max_depth=10, n_jobs=-1, random_state=42)",
-    }
-    optimized_results
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""### 3.4 LightGBM""")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-    We trained our LightGBM Classifier model using the following code:
-
-    ```py
-    # 📌 LightGBM
-    import warnings
-
-    warnings.filterwarnings(
-        "ignore", message="X does not have valid feature names"
-    )
-
-    # 📌 Get numerical and categorical variables (binary and mutiple)
-    num_cols = X_train.select_dtypes(include="number").columns.to_list()
-    cat_cols = X_train.select_dtypes(include="object").columns.to_list()
-
-    binary_cols = [col for col in cat_cols if X_train[col].nunique() == 2]
-    multi_cols = [col for col in cat_cols if X_train[col].nunique() > 2]
-
-    # 📌 [1] Create the pipelines for different data types
-    numerical_pipeline = Pipeline(
-        steps=[
-            ("imputer", SimpleImputer(strategy="median")),
-            ("scaler", MinMaxScaler()),
-        ]
-    )
-
-    binary_pipeline = Pipeline(
-        steps=[
-            ("imputer", SimpleImputer(strategy="most_frequent")),
-            ("ordinal", OrdinalEncoder()),
-            ("scaler", MinMaxScaler()),
-        ]
-    )
-
-    multi_pipeline = Pipeline(
-        steps=[
-            ("imputer", SimpleImputer(strategy="most_frequent")),
-            (
-                "onehot",
-                OneHotEncoder(handle_unknown="ignore", sparse_output=False),
-            ),
-            ("scaler", MinMaxScaler()),
-        ]
-    )
-
-    # 📌 [2] Create the preprocessor using ColumnTransformer
-    preprocessor = ColumnTransformer(
-        transformers=[
-            ("binary", binary_pipeline, binary_cols),
-            ("multi", multi_pipeline, multi_cols),
-            ("numerical", numerical_pipeline, num_cols),
-        ],
-        remainder="passthrough",
-    )
-
-    # 📌 [3] Create the Final Pipeline that combines the preprocessor and the model
-    lgbm = LGBMClassifier(
-        n_estimators=500,
-        learning_rate=0.05,
-        max_depth=-1,
-        random_state=42,
-        class_weight="balanced",
-        n_jobs=-1,
-    )
-
-    lgbm_pipeline = Pipeline(
-        steps=[("preprocessor", preprocessor), ("classifier", lgbm)]
-    )
-
-    # 📌 [4] Fit the Final Pipeline on the ORIGINAL, unprocessed data
-    # The pipeline takes care of all the preprocessing internally.
-    lgbm_pipeline.fit(X_train, y_train)
-
-    lgbm_train_pred = lgbm_pipeline.predict_proba(X_train)[:, 1]
-    lgbm_test_pred = lgbm_pipeline.predict_proba(X_test)[:, 1]
-
-    lgbm_scores = {
-        "train_score": roc_auc_score(y_train, lgbm_train_pred),
-        "test_score": roc_auc_score(y_test, lgbm_test_pred),
-    }
-    lgbm_scores
-    ```
-
-    📈 The ROC AUC scores obtained:
-    """
-    )
-    return
-
-
-@app.cell
-def _():
-    lgbm_scores = {
-        "train_score": 0.8523466410959462,
-        "test_score": 0.7514895868142193,
-    }
-    lgbm_scores
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""## 4. Model Performance Analysis""")
+    mo.Html("<hr><br>")
     return
 
 
@@ -645,7 +428,7 @@ def _(mo):
     lg_stat = mo.stat(
         label="Logistic Regression",
         bordered=True,
-        value="🏋️ 0.687 🔎 0.685",
+        value="💪🏻 0.687 📝 0.685",
         caption="Scores are consistent across train and test, indicating no overfitting. However, the overall AUC is low, suggesting underfitting — the model is too simple to capture complex patterns.",
         direction="decrease",
     )
@@ -653,7 +436,7 @@ def _(mo):
     rfc_stat = mo.stat(
         label="Random Forest Classifier",
         bordered=True,
-        value="🏋️ 1.0 🔎 0.707",
+        value="💪🏻 1.0 📝 0.707",
         caption="Perfect training AUC indicates severe overfitting — the model memorized the training set. While the test score is better than Logistic Regression, the gap is too large for good generalization.",
         direction="decrease",
     )
@@ -661,7 +444,7 @@ def _(mo):
     rfo_stat = mo.stat(
         label="Random Forest with Randomized Search",
         bordered=True,
-        value="🏋️ 0.820 🔎 0.731",
+        value="💪🏻 0.820 📝 0.731",
         caption="Hyperparameter tuning greatly reduced overfitting. The smaller train–test gap and improved test AUC show better generalization and a strong performance.",
         direction="increase",
     )
@@ -669,7 +452,7 @@ def _(mo):
     lgbm_stat = mo.stat(
         label="LightGBM",
         bordered=True,
-        value="🏋️ 0.852 🔎 0.751",
+        value="💪🏻 0.852 📝 0.751",
         caption="Best overall performance. Small train–test gap and highest test AUC indicate a well-balanced model with strong generalization.",
         direction="increase",
     )
@@ -689,7 +472,42 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(r"""## 5. Model Selection""")
+    mo.Html("<br>")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""Based on a comparison of all the models _(using AUC ROC metric)_, the final model selection is clear."""
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.Html("<br>")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.center(
+        mo.md(r"""
+    | Model | 💪🏻 Train Score | 📝 Test Score |
+    | :--- | :---: | :---: |
+    | Logistic Regression | 0.687 | 0.685 |
+    | Random Forest Classifier | 1.000 | 0.707 |
+    | Randomized Search (Tuned RF) | 0.820 | 0.731 |
+    | **LightGBM** | 0.852 | **0.751** |
+    """)
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.Html("<br>")
     return
 
 
@@ -697,15 +515,6 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-    Based on a comparison of all the models, the final model selection is clear.
-
-    | Model | Train Score (AUC ROC) | Test Score (AUC ROC) |
-    | :--- | :---: | :---: |
-    | Logistic Regression | 0.687 | 0.685 |
-    | Random Forest Classifier | 1.000 | 0.707 |
-    | Randomized Search (Tuned RF) | 0.820 | 0.731 |
-    | **LightGBM** | 0.852 | **0.751** |
-
     * The **Logistic Regression** model performed poorly due to underfitting.
     * The base **Random Forest** model, while better, suffered from severe overfitting.
     * The tuned **Random Forest** model was a significant improvement and a strong contender, achieving a solid `test_score`.
@@ -717,9 +526,16 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.callout(
-        kind="success",
-        value="🥇 Therefore, we will select the LightGBM model as our final choice for deployment.",
+    mo.Html("<br><hr><br>")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.center(
+        mo.md(
+            "**Connect with me:** 💼 [Linkedin](https://www.linkedin.com/in/alex-turpo/) • 🐱 [GitHub](https://github.com/iBrokeTheCode) • 🤗 [Hugging Face](https://huggingface.co/iBrokeTheCode)"
+        )
     )
     return
 
