@@ -642,32 +642,47 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-    ### 4.1 Logistic Regression
+    lg_stat = mo.stat(
+        label="Logistic Regression",
+        bordered=True,
+        value="🏋️ 0.687 🔎 0.685",
+        caption="Scores are consistent across train and test, indicating no overfitting. However, the overall AUC is low, suggesting underfitting — the model is too simple to capture complex patterns.",
+        direction="decrease",
+    )
 
-    The Logistic Regression model shows a `train_score` of 0.687 and a `test_score` of 0.685.
+    rfc_stat = mo.stat(
+        label="Random Forest Classifier",
+        bordered=True,
+        value="🏋️ 1.0 🔎 0.707",
+        caption="Perfect training AUC indicates severe overfitting — the model memorized the training set. While the test score is better than Logistic Regression, the gap is too large for good generalization.",
+        direction="decrease",
+    )
 
-    **Interpretation:** This model's performance is consistent across the training and testing sets, as indicated by the very small gap between the scores. This means the model is not overfitting. However, the overall scores are relatively low for a binary classification task, suggesting that the model is likely **underfitting**. It's too simple to capture the underlying patterns in the data effectively.
+    rfo_stat = mo.stat(
+        label="Random Forest with Randomized Search",
+        bordered=True,
+        value="🏋️ 0.820 🔎 0.731",
+        caption="Hyperparameter tuning greatly reduced overfitting. The smaller train–test gap and improved test AUC show better generalization and a strong performance.",
+        direction="increase",
+    )
 
-    ### 4.2 Random Forest Classifier
+    lgbm_stat = mo.stat(
+        label="LightGBM",
+        bordered=True,
+        value="🏋️ 0.852 🔎 0.751",
+        caption="Best overall performance. Small train–test gap and highest test AUC indicate a well-balanced model with strong generalization.",
+        direction="increase",
+    )
 
-    The base Random Forest model produced a `train_score` of 1.0 and a `test_score` of 0.707.
-
-    **Interpretation:** The perfect `train_score` of 1.0 is a clear and severe sign of **overfitting**. The model has essentially memorized the training data, and this does not generalize well to unseen data, as shown by the much lower `test_score`. While the test score is better than the Logistic Regression, the model is too complex and needs to be regularized or tuned to perform better.
-
-    ### 4.3 Randomized Search with Cross Validations (Random Forest)
-
-    The hyperparameter-tuned Random Forest model achieved a `train_score` of 0.820 and a `test_score` of 0.731.
-
-    **Interpretation:** This is a much better result than the base Random Forest. The gap between the `train_score` and `test_score` is significantly smaller, indicating that the hyperparameter tuning successfully **reduced overfitting**. The `test_score` of 0.731 is also a notable improvement, showing that the model now generalizes better to unseen data. This is a well-performing and well-tuned model.
-
-    ### 4.4 LightGBM
-
-    The LightGBM model produced a `train_score` of 0.852 and a `test_score` of 0.751.
-
-    **Interpretation:** The LightGBM model shows the best overall performance with the highest `test_score` of 0.751. There is a small gap between the training and testing scores, which is normal for a powerful boosting model, suggesting a good balance between capturing complex patterns and generalizing well. The model is performing exceptionally and is neither severely overfitting nor underfitting.
-    """
+    mo.vstack(
+        items=[
+            mo.hstack(items=[lg_stat, rfc_stat], widths="equal", gap=1),
+            mo.hstack(items=[rfo_stat, lgbm_stat], widths="equal", gap=1),
+        ],
+        gap=1,
+        heights="equal",
+        align="center",
+        justify="center",
     )
     return
 
