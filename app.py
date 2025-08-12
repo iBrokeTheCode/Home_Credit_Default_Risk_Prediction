@@ -26,7 +26,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.Html("<br><hr><br>")
+    mo.Html("<br>")
     return
 
 
@@ -266,18 +266,13 @@ def _(features_widgets, mo):
     # 📌 [4] Create the form with the sliders
     sliders_form = (
         mo.md("""
-        ### Enter Client Information
+        ###Fill in the Client Profile to see the prediction
 
-        {EXT_SOURCE_3}
-        {EXT_SOURCE_2}
-        {DAYS_BIRTH}
-        {EXT_SOURCE_1}
-        {AMT_ANNUITY}
-        {AMT_CREDIT}
-        {DAYS_EMPLOYED}
-        {DAYS_ID_PUBLISH}
-        {DAYS_REGISTRATION}
-        {SK_ID_CURR}
+        {EXT_SOURCE_3}  {EXT_SOURCE_2}
+        {DAYS_BIRTH}  {EXT_SOURCE_1}
+        {AMT_ANNUITY}  {AMT_CREDIT}
+        {DAYS_EMPLOYED}  {DAYS_ID_PUBLISH}
+        {DAYS_REGISTRATION} {SK_ID_CURR}
         """)
         .batch(**features_widgets)  # Pass the dict unpacked
         .form(show_clear_button=True, bordered=True)
@@ -286,15 +281,8 @@ def _(features_widgets, mo):
 
 
 @app.cell
-def _(sliders_form):
-    # 📌 [5] Display the form
-    sliders_form
-    return
-
-
-@app.cell
 def _(default_values, loaded_pipeline, mo, pd, sliders_form):
-    # 📌 [6] Get prediction from model
+    # 📌 [5] Get prediction from model
     probability = None
 
     # Process form submission
@@ -317,7 +305,7 @@ def _(default_values, loaded_pipeline, mo, pd, sliders_form):
 
 @app.cell
 def _(probability):
-    # 📌 [7] Display prediction results
+    # 📌 [6] Display prediction results
     prob_percent = 70.12
     risk = "High Risk"
     direction = "decrease"
@@ -339,31 +327,13 @@ def _(probability):
 
 
 @app.cell
-def _(mo):
-    mo.Html("<br>")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md("## 🔮 Credit Risk Prediction")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.Html("<hr><br>")
-    return
-
-
-@app.cell
 def _(direction, mo, prob_percent, risk):
-    interpretation_text = f"""This means there is a {prob_percent}% chance the client will **default on their loan**.  
-    Risk level is categorized as **{risk}**, which can help guide loan approval decisions.
+    interpretation_text = f"""This means there is a {prob_percent}% chance the client will default on their loan.  
+    Risk level is categorized as {risk}, which can help guide loan approval decisions.
     """
 
     result_stat = mo.stat(
-        label="🎲 Probability of Payment Difficulties",
+        label="⚖️ Probability of Payment Difficulties",
         bordered=True,
         value=f"{prob_percent}%",
         caption=risk,
@@ -377,6 +347,18 @@ def _(direction, mo, prob_percent, risk):
         caption=interpretation_text,
     )
     return interpretation_stat, result_stat
+
+
+@app.cell
+def _(mo):
+    mo.md("""## 🔮 Credit Risk Predictor — Try It Yourself!""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.Html("<hr><br>")
+    return
 
 
 @app.cell
@@ -395,19 +377,30 @@ def _(interpretation_stat, mo, result_stat):
 
 @app.cell
 def _(mo):
-    mo.Html("<br><hr>")
+    mo.Html("<br>")
+    return
+
+
+@app.cell
+def _(sliders_form):
+    sliders_form
     return
 
 
 @app.cell
 def _(mo):
-    mo.callout(
-        kind="info",
-        value=mo.md(
-            """💡 **Want a step-by-step walkthrough instead?**   
-        Check the Jupyter notebook version here: 👉 [Jupyter notebook](https://huggingface.co/spaces/iBrokeTheCode/Home_Credit_Default_Risk_Prediction/blob/main/tutorial_app.ipynb)""",
-        ),
+    mo.md(
+        r"""
+    <small>_(*) Predictions are based on the top 10 most important features. Remaining features are assigned default values (median for numeric, mode for categorical)._</small>
+
+    """
     )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.Html("<br>")
     return
 
 
@@ -428,7 +421,7 @@ def _(mo):
     lg_stat = mo.stat(
         label="Logistic Regression",
         bordered=True,
-        value="💪🏻 0.687 📝 0.685",
+        value="💪🏻 68.7% 📝 68.5%",
         caption="Scores are consistent across train and test, indicating no overfitting. However, the overall AUC is low, suggesting underfitting — the model is too simple to capture complex patterns.",
         direction="decrease",
     )
@@ -436,7 +429,7 @@ def _(mo):
     rfc_stat = mo.stat(
         label="Random Forest Classifier",
         bordered=True,
-        value="💪🏻 1.0 📝 0.707",
+        value="💪🏻 100% 📝 70.7%",
         caption="Perfect training AUC indicates severe overfitting — the model memorized the training set. While the test score is better than Logistic Regression, the gap is too large for good generalization.",
         direction="decrease",
     )
@@ -444,7 +437,7 @@ def _(mo):
     rfo_stat = mo.stat(
         label="Random Forest with Randomized Search",
         bordered=True,
-        value="💪🏻 0.820 📝 0.731",
+        value="💪🏻 82% 📝 73.1%",
         caption="Hyperparameter tuning greatly reduced overfitting. The smaller train–test gap and improved test AUC show better generalization and a strong performance.",
         direction="increase",
     )
@@ -452,7 +445,7 @@ def _(mo):
     lgbm_stat = mo.stat(
         label="LightGBM",
         bordered=True,
-        value="💪🏻 0.852 📝 0.751",
+        value="💪🏻 85.2% 📝 75.1%",
         caption="Best overall performance. Small train–test gap and highest test AUC indicate a well-balanced model with strong generalization.",
         direction="increase",
     )
@@ -479,7 +472,7 @@ def _(mo):
 @app.cell
 def _(mo):
     mo.md(
-        r"""Based on a comparison of all the models _(using AUC ROC metric)_, the final model selection is clear."""
+        r"""Based on a comparison of all the models _(using AUC ROC metric)_, the final model selection is clear:"""
     )
     return
 
@@ -499,7 +492,7 @@ def _(mo):
     | Logistic Regression | 0.687 | 0.685 |
     | Random Forest Classifier | 1.000 | 0.707 |
     | Randomized Search (Tuned RF) | 0.820 | 0.731 |
-    | **LightGBM** | 0.852 | **0.751** |
+    | **LightGBM** | **0.852** | **0.751** |
     """)
     )
     return
@@ -520,6 +513,19 @@ def _(mo):
     * The tuned **Random Forest** model was a significant improvement and a strong contender, achieving a solid `test_score`.
     * However, the **LightGBM** model ultimately demonstrated the best performance, achieving the highest **ROC AUC test score of 0.751**. This indicates that it is the most robust and accurate model for predicting loan repayment risk on unseen data.
     """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.callout(
+        kind="info",
+        value=mo.md(
+            """💡 **Want to explore the process in detail?**
+        
+                See the full 👉 [Jupyter notebook](https://huggingface.co/spaces/iBrokeTheCode/Home_Credit_Default_Risk_Prediction/blob/main/tutorial_app.ipynb) 👈️ for an end-to-end walkthrough, including Exploratory Data Analysis, preprocessing, model training, evaluation, model selection, and saving the final model."""
+        ),
     )
     return
 
